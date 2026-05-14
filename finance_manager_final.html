@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Personal Finance Manager</title>
+<style>
+:root{
+  --bg:#f5f4f0;--surface:#fff;--surface2:#f0efe9;--border:rgba(0,0,0,.10);--border2:rgba(0,0,0,.18);
+  --text:#1a1a18;--text2:#5a5a55;--text3:#9a9a94;
+  --green:#1D9E75;--green-bg:#e1f5ee;--amber:#EF9F27;--amber-bg:#faeeda;
+  --red:#E24B4A;--red-bg:#fcebeb;--blue:#378ADD;--blue-bg:#e6f1fb;
+  --r:10px;--rl:14px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1a1a18;--surface:#242422;--surface2:#2e2e2b;
+  --border:rgba(255,255,255,.10);--border2:rgba(255,255,255,.18);
+  --text:#f0f0ea;--text2:#a0a09a;--text3:#606058;
+  --green-bg:#04342c;--amber-bg:#412402;--red-bg:#501313;--blue-bg:#042c53;
+}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{max-width:740px;margin:0 auto;padding:1.5rem 1rem 5rem}
+/* Header */
+.hdr{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:.5px solid var(--border)}
+.hdr h1{font-size:19px;font-weight:700}.hdr p{font-size:12px;color:var(--text2);margin-top:2px}
+.mnav{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.mnav button{background:none;border:.5px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;color:var(--text2);font-size:12px}
+.mnav button:hover{background:var(--surface2)}
+.mnav span{font-size:13px;font-weight:600;color:var(--text);min-width:115px;text-align:center}
+/* Metrics */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:1.5rem}
+.mc{background:var(--surface2);border-radius:var(--r);padding:.65rem .9rem}
+.mc-l{font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+.mc-v{font-size:16px;font-weight:700}
+.mc-v.g{color:var(--green)}.mc-v.r{color:var(--red)}.mc-v.a{color:var(--amber)}.mc-v.b{color:var(--blue)}
+/* Tabs */
+.tabs{display:flex;gap:3px;margin-bottom:1.25rem;flex-wrap:wrap}
+.tab{padding:6px 11px;border-radius:var(--r);border:.5px solid var(--border);font-size:11px;cursor:pointer;background:transparent;color:var(--text2);transition:all .15s}
+.tab:hover{background:var(--surface2)}
+.tab.active{background:var(--surface);color:var(--text);border-color:var(--border2);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.pane{display:none}.pane.active{display:block}
+/* Shared */
+.stitle{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.7rem}
+.card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);padding:1rem 1.2rem;margin-bottom:10px}
+.colh{display:flex;align-items:center;gap:8px;padding:0 0 5px;border-bottom:.5px solid var(--border2);margin-bottom:2px}
+.ch{font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border)}
+.row:last-child{border-bottom:none}
+.rl{flex:1;font-size:13px;color:var(--text);min-width:0}
+.bw{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;min-width:30px}
+.bf{height:100%;border-radius:3px;transition:width .4s}
+.bf.ok{background:var(--green)}.bf.wn{background:var(--amber)}.bf.ov{background:var(--red)}
+.rd{width:55px;text-align:right;font-size:12px;font-weight:700}
+.rd.p{color:var(--green)}.rd.n{color:var(--red)}
+.delbtn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0 2px;line-height:1}
+.delbtn:hover{color:var(--red)}
+.addr{display:flex;gap:6px;margin-top:10px;align-items:center;flex-wrap:wrap}
+input[type=text],input[type=number]{background:var(--surface2);border:.5px solid var(--border2);border-radius:6px;padding:6px 9px;font-size:13px;color:var(--text);outline:none;transition:border .15s}
+input[type=text]:focus,input[type=number]:focus{border-color:var(--blue)}
+input[type=range]{accent-color:var(--green)}
+.f1{flex:1;min-width:70px}.w80{width:80px}.w90{width:90px}
+.btn{padding:6px 12px;font-size:12px;cursor:pointer;border-radius:6px;border:.5px solid var(--border2);background:transparent;color:var(--text);transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--surface2)}
+.btn.pri{background:var(--text);color:var(--bg);border-color:var(--text)}
+.btn.pri:hover{opacity:.85}
+.banner{border-radius:var(--r);padding:.7rem 1rem;margin-bottom:.9rem;font-size:13px;line-height:1.5}
+.banner.d{background:var(--red-bg);color:var(--red);border:.5px solid var(--red)}
+.banner.w{background:var(--amber-bg);color:var(--amber);border:.5px solid var(--amber)}
+.banner.s{background:var(--green-bg);color:var(--green);border:.5px solid var(--green)}
+.banner.i{background:var(--blue-bg);color:var(--blue);border:.5px solid var(--blue)}
+.rulebox{background:var(--surface2);border-radius:var(--r);padding:.7rem 1rem;margin-bottom:1.2rem}
+.rr{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+/* Sim */
+.slrow{display:flex;align-items:center;gap:12px;margin-bottom:9px}
+.sll{font-size:13px;color:var(--text2);width:88px;flex-shrink:0}
+.slv{font-size:13px;font-weight:700;color:var(--text);width:78px;text-align:right;flex-shrink:0}
+.igrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:1rem}
+.ib{background:var(--surface2);border-radius:var(--r);padding:.55rem .75rem;text-align:center}
+.ibl{font-size:10px;color:var(--text3);margin-bottom:3px}
+.ibv{font-size:14px;font-weight:700}
+.sbar{height:10px;border-radius:5px;background:var(--surface2);overflow:hidden;margin:.7rem 0 .2rem}
+.sfill{height:100%;border-radius:5px;transition:width .4s,background .4s}
+.slabs{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:.9rem}
+/* Prog bars */
+.prog{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin:6px 0}
+.pr{height:100%;border-radius:4px;background:var(--red)}
+.pg{height:100%;border-radius:4px;background:var(--green)}
+.pa{height:100%;border-radius:4px;background:var(--amber)}
+.badge{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--blue-bg);color:var(--blue);font-weight:700}
+/* Net worth */
+.nwhero{text-align:center;padding:1.5rem 1rem;background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);margin-bottom:1rem}
+.nwnum{font-size:38px;font-weight:700;margin-bottom:4px}
+.nwgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.nwsec{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);padding:1rem 1.2rem}
+.nwrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid var(--border);font-size:13px}
+.nwrow:last-child{border-bottom:none}
+.nwtot{display:flex;justify-content:space-between;font-size:13px;font-weight:700;padding-top:7px;margin-top:4px;border-top:.5px solid var(--border2)}
+.hrow{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:.5px solid var(--border);font-size:13px}
+.hrow:last-child{border-bottom:none}
+.hmo{color:var(--text2);width:100px;flex-shrink:0}
+.hbw{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.hb{height:100%;border-radius:3px}
+.hv{width:80px;text-align:right;font-weight:700;flex-shrink:0}
+/* Score */
+.scirc{width:78px;height:78px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid;flex-shrink:0}
+/* Tax */
+.trow{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:.5px solid var(--border)}
+.trow:last-child{border-bottom:none;font-weight:700}
+/* Review */
+.rev-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.rev-item{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);padding:1rem}
+.rev-q{font-size:13px;color:var(--text2);margin-bottom:.6rem;line-height:1.4}
+.rev-btns{display:flex;gap:6px}
+.rev-btn{padding:5px 12px;border-radius:6px;border:.5px solid var(--border2);font-size:12px;cursor:pointer;background:transparent;color:var(--text2);transition:all .15s}
+.rev-btn:hover{background:var(--surface2)}
+.rev-btn.yes.sel{background:var(--green-bg);color:var(--green);border-color:var(--green)}
+.rev-btn.no.sel{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+.rev-score{text-align:center;padding:1.5rem;background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);margin-bottom:1rem}
+/* Projection */
+.proj-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:.5px solid var(--border);font-size:13px}
+.proj-row:last-child{border-bottom:none}
+.proj-mo{color:var(--text2);width:65px;flex-shrink:0;font-size:12px}
+.proj-bw{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.proj-fill{height:100%;border-radius:4px;transition:width .4s}
+.proj-val{width:85px;text-align:right;font-weight:700;font-size:12px;flex-shrink:0}
+/* Impulse */
+.impitem{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:.5px solid var(--border);font-size:13px}
+.impitem:last-child{border-bottom:none}
+/* Pattern detector */
+.pat-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:.5px solid var(--border);font-size:13px}
+.pat-item:last-child{border-bottom:none}
+.empty{font-size:13px;color:var(--text3);padding:1.5rem 0;text-align:center}
+.sind{font-size:11px;color:var(--green);margin-left:8px;opacity:0;transition:opacity .3s}
+.sind.show{opacity:1}
+/* Snowball */
+.sb-item{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rl);padding:1rem 1.2rem;margin-bottom:10px}
+.sb-date{font-size:22px;font-weight:700;color:var(--green);margin-bottom:2px}
+.sb-label{font-size:13px;color:var(--text2)}
+.sb-prog{height:12px;background:var(--surface2);border-radius:6px;overflow:hidden;margin:10px 0 6px}
+.sb-fill{height:100%;border-radius:6px;background:var(--red);transition:width .4s}
+@media(max-width:480px){
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .igrid{grid-template-columns:1fr 1fr}
+  .nwgrid{grid-template-columns:1fr}
+  .rev-grid{grid-template-columns:1fr}
+  .tabs{gap:2px}.tab{padding:5px 7px;font-size:10px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="hdr">
+  <div><h1>Personal Ledger <span class="sind" id="sind">✓ saved</span></h1><p>Rockefeller method — every dollar tracked</p></div>
+  <div class="mnav">
+    <button onclick="chMo(-1)">&#8592;</button>
+    <span id="moLabel"></span>
+    <button onclick="chMo(1)">&#8594;</button>
+  </div>
+</div>
+<div id="warnBanner"></div>
+<div class="metrics" id="metrics"></div>
+<div class="tabs">
+  <button class="tab active" onclick="sw('sim')">&#128200; Commission</button>
+  <button class="tab" onclick="sw('budget')">Budget</button>
+  <button class="tab" onclick="sw('networth')">Net Worth</button>
+  <button class="tab" onclick="sw('snowball')">Debt Countdown</button>
+  <button class="tab" onclick="sw('projection')">Projection</button>
+  <button class="tab" onclick="sw('review')">Monthly Review</button>
+  <button class="tab" onclick="sw('history')">&#128197; History</button>
+  <button class="tab" onclick="sw('patterns')">Patterns</button>
+  <button class="tab" onclick="sw('savings')">Savings</button>
+  <button class="tab" onclick="sw('debt')">Debt</button>
+  <button class="tab" onclick="sw('impulse')">Impulse</button>
+  <button class="tab" onclick="sw('tax')">Tax</button>
+  <button class="tab" onclick="sw('score')">Score</button>
+  <button class="tab" onclick="sw('howto')">&#10067; How to use</button>
+</div>
+
+<!-- COMMISSION -->
+<div class="pane active" id="pane-sim">
+  <div class="card">
+    <div style="font-size:15px;font-weight:700;margin-bottom:1rem">Live commission calculator</div>
+    <div class="slrow"><span class="sll">Units sold</span><input type="range" min="0" max="20" value="0" step="1" id="usl" style="flex:1" oninput="updSim()"/><span class="slv" id="uv">0</span></div>
+    <div class="slrow"><span class="sll">GP per unit</span><input type="range" min="1000" max="25000" value="1000" step="500" id="gsl" style="flex:1" oninput="updSim()"/><span class="slv" id="gv">N$8,000</span></div>
+    <div class="slrow"><span class="sll">GF support</span><input type="range" min="0" max="6000" value="4500" step="500" id="gfsl" style="flex:1" oninput="updSim()"/><span class="slv" id="gfv">N$5,000</span></div>
+    <div class="slabs"><span>Danger (&lt;6)</span><span>Stable (8)</span><span>Winning (12+)</span></div>
+    <div class="sbar"><div class="sfill" id="sfill" style="width:0%"></div></div>
+    <div class="igrid">
+      <div class="ib"><div class="ibl">Basic (net)</div><div class="ibv">N$12,150</div></div>
+      <div class="ib"><div class="ibl">Commission (net)</div><div class="ibv" id="cn" style="color:var(--green)">N$0</div></div>
+      <div class="ib"><div class="ibl">GF support</div><div class="ibv" id="gfn" style="color:var(--blue)">N$5,000</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:1rem;border-top:.5px solid var(--border)">
+      <div><div style="font-size:12px;color:var(--text2)">Total take-home</div><div style="font-size:26px;font-weight:700" id="tth">N$17,150</div></div>
+      <div style="text-align:right"><div style="font-size:12px;color:var(--text2)">Monthly surplus</div><div style="font-size:20px;font-weight:700" id="surD">—</div></div>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-top:10px;padding-top:10px;border-top:.5px solid var(--border);line-height:1.6" id="simMsg"></div>
+  </div>
+  <div class="card">
+    <div class="stitle">Commission after tax</div>
+    <div class="trow"><span style="color:var(--text2)">Gross commission</span><span id="gc">N$0</span></div>
+    <div class="trow"><span style="color:var(--text2)">PAYE deducted (~30%)</span><span style="color:var(--red)" id="tc">N$0</span></div>
+    <div class="trow"><span>Net commission</span><span style="color:var(--green)" id="nc">N$0</span></div>
+  </div>
+  <div class="card">
+    <div class="stitle">Debt payoff at this income</div>
+    <div class="trow"><span style="color:var(--text2)">Credit card (N$24,000)</span><span id="ccp">— months</span></div>
+    <div class="trow"><span style="color:var(--text2)">NAMRA (N$50,000)</span><span id="np">— months</span></div>
+  </div>
+  <div class="card">
+    <div class="stitle">Log extra income this month</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5">Side project, freelance work, cash received — log it here and it flows into your budget and surplus automatically.</div>
+    <div id="extraIncomeList" style="margin-bottom:8px"></div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <input type="text" id="extraLabel" placeholder="What was it? (e.g. Logo design)" class="f1" style="min-width:120px"/>
+      <input type="number" id="extraAmt" placeholder="Amount (NAD)" class="w90"/>
+      <button class="btn" onclick="addExtraIncome()" style="background:var(--text);color:var(--bg)">+ Add income</button>
+    </div>
+  </div>
+</div>
+
+<!-- BUDGET -->
+<div class="pane" id="pane-budget">
+  <div class="rulebox" id="rulebox"></div>
+  <div style="margin-bottom:1.5rem">
+    <div class="stitle">Income (after tax)</div>
+    <div class="colh"><div style="flex:1"></div><div class="ch" style="width:80px">budget</div><div class="ch" style="width:80px">actual</div><div class="ch" style="width:55px;text-align:right">+/−</div><div style="width:20px"></div></div>
+    <div id="incRows"></div>
+    <div class="addr"><input type="text" id="iL" placeholder="Income source" class="f1"/><input type="number" id="iB" placeholder="Budget" class="w80"/><input type="number" id="iA" placeholder="Actual" class="w80"/><button class="btn" onclick="addInc()">+ Add</button></div>
+  </div>
+  <div>
+    <div class="stitle">Expenses</div>
+    <div class="colh"><div style="flex:1"></div><div class="ch" style="width:80px">budget</div><div class="ch" style="width:80px">actual</div><div class="ch" style="width:55px;text-align:right">+/−</div><div style="width:20px"></div></div>
+    <div id="expRows"></div>
+    <div class="addr"><input type="text" id="eL" placeholder="Expense name" class="f1"/><input type="number" id="eB" placeholder="Budget" class="w80"/><input type="number" id="eA" placeholder="Actual" class="w80"/><button class="btn" onclick="addExp()">+ Add</button></div>
+  </div>
+</div>
+
+<!-- NET WORTH -->
+<div class="pane" id="pane-networth">
+  <div class="nwhero" id="nwhero"></div>
+  <div class="nwgrid">
+    <div class="nwsec">
+      <div class="stitle" style="margin-bottom:.7rem">Assets</div>
+      <div id="assetRows"></div>
+      <div class="nwtot"><span>Total assets</span><span style="color:var(--green)" id="ta">N$0</span></div>
+      <div class="addr" style="margin-top:10px"><input type="text" id="aN" placeholder="Asset name" class="f1"/><input type="number" id="aV" placeholder="Value" class="w90"/><button class="btn" onclick="addAsset()">+ Add</button></div>
+    </div>
+    <div class="nwsec">
+      <div class="stitle" style="margin-bottom:.7rem">Liabilities</div>
+      <div id="liabRows"></div>
+      <div class="nwtot"><span>Total debt</span><span style="color:var(--red)" id="tl">N$0</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="stitle">Net worth history</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:1rem">Click "Record" at end of each month. Watch the number climb toward zero and beyond.</div>
+    <div id="nwhist"></div>
+    <button class="btn pri" style="margin-top:1rem;width:100%" onclick="recNW()">&#128190; Record this month</button>
+  </div>
+  <div class="card">
+    <div class="stitle">Financial independence tracker</div>
+    <div id="fitrack"></div>
+  </div>
+</div>
+
+<!-- DEBT SNOWBALL COUNTDOWN -->
+<div class="pane" id="pane-snowball">
+  <div class="banner i" style="margin-bottom:1rem">Debt snowball method: kill the smallest debt first (credit card). Every payment you make moves these dates closer. Update your debt balances monthly.</div>
+  <div id="sbCards"></div>
+  <div class="card" style="margin-top:1rem">
+    <div class="stitle">Your debt-free date</div>
+    <div id="dfDate"></div>
+  </div>
+</div>
+
+<!-- ANNUAL PROJECTION -->
+<div class="pane" id="pane-projection">
+  <div class="card">
+    <div class="stitle">12-month projection — adjust assumptions</div>
+    <div class="slrow" style="margin-top:.5rem"><span class="sll">Units/month</span><input type="range" min="0" max="20" value="8" step="1" id="pUnits" style="flex:1" oninput="updProj()"/><span class="slv" id="pUv">8</span></div>
+    <div class="slrow"><span class="sll">GP per unit</span><input type="range" min="1000" max="25000" value="1000" step="500" id="pGP" style="flex:1" oninput="updProj()"/><span class="slv" id="pGv">N$8,000</span></div>
+    <div class="slrow"><span class="sll">GF support</span><input type="range" min="0" max="6000" value="4500" step="500" id="pGF" style="flex:1" oninput="updProj()"/><span class="slv" id="pGFv">N$5,000</span></div>
+  </div>
+  <div class="card">
+    <div class="stitle">Where you end up in 12 months</div>
+    <div id="projSummary" style="margin-bottom:1rem"></div>
+    <div class="stitle">Net worth trajectory</div>
+    <div id="projChart"></div>
+  </div>
+</div>
+
+<!-- MONTHLY REVIEW -->
+<div class="pane" id="pane-review">
+  <div class="banner i">Complete this at the end of every month. Honest answers only — this is for you.</div>
+  <div class="rev-grid" id="revGrid"></div>
+  <div class="rev-score" id="revScore"></div>
+  <div class="card">
+    <div class="stitle">Review history</div>
+    <div id="revHist"></div>
+    <button class="btn pri" style="margin-top:1rem;width:100%" onclick="saveReview()">&#128190; Save this month's review</button>
+  </div>
+</div>
+
+<!-- MONTHLY HISTORY -->
+<div class="pane" id="pane-history">
+  <div class="banner i" style="margin-bottom:1rem">Every month you navigate away from is auto-saved. Come back anytime to see your full history. Update actuals before moving to the next month.</div>
+  <div class="card">
+    <div class="stitle">Monthly summary — all recorded months</div>
+    <div id="histTable"></div>
+  </div>
+  <div class="card">
+    <div class="stitle">Income vs expenses trend</div>
+    <div id="histChart"></div>
+  </div>
+  <div class="card">
+    <div class="stitle">Surplus / deficit by month</div>
+    <div id="histSurplus"></div>
+  </div>
+</div>
+
+<!-- SPENDING PATTERNS -->
+<div class="pane" id="pane-patterns">
+  <div class="banner i" style="margin-bottom:1rem">This tracks which categories you consistently overspend. Patterns only show after 2+ months of actuals. Update your actuals regularly in the Budget tab.</div>
+  <div id="patternCards"></div>
+</div>
+
+<!-- SAVINGS -->
+<div class="pane" id="pane-savings">
+  <div id="savCards"></div>
+  <div class="addr" style="margin-top:.5rem">
+    <input type="text" id="sN" placeholder="Goal name" class="f1"/>
+    <input type="number" id="sT" placeholder="Target (N$)" class="w90"/>
+    <input type="number" id="sS" placeholder="Saved so far" class="w90"/>
+    <input type="number" id="sMo" placeholder="Per month" class="w90"/>
+    <button class="btn" onclick="addSav()">+ Add</button>
+  </div>
+</div>
+
+<!-- DEBT -->
+<div class="pane" id="pane-debt">
+  <div id="debtPayCalc"></div>
+  <div id="debtCards"></div>
+  <div class="addr" style="margin-top:.5rem">
+    <input type="text" id="dN" placeholder="Debt name" class="f1"/>
+    <input type="number" id="dT" placeholder="Total owed" class="w90"/>
+    <input type="number" id="dP" placeholder="Monthly pmt" class="w90"/>
+    <button class="btn" onclick="addDebt()">+ Add</button>
+  </div>
+</div>
+
+<!-- IMPULSE -->
+<div class="pane" id="pane-impulse">
+  <div class="banner i">Log it. Wait 48 hours. Most impulse buys die here. You said you're impulsive — this is your circuit breaker.</div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+    <span style="font-size:13px;color:var(--text2)">Monthly budget:</span>
+    <input type="number" id="impB" value="500" style="width:85px"/>
+    <span style="font-size:13px;color:var(--text2)">NAD</span>
+    <button class="btn" onclick="setImpB()">Set</button>
+  </div>
+  <div id="impBbar" style="margin-bottom:1rem"></div>
+  <div class="addr"><input type="text" id="impD" placeholder="What do you want to buy?" class="f1"/><input type="number" id="impA" placeholder="Cost (NAD)" class="w90"/><button class="btn" onclick="addImp()">+ Log it</button></div>
+  <div id="impList" style="margin-top:1rem"></div>
+</div>
+
+<!-- TAX -->
+<div class="pane" id="pane-tax">
+  <div class="card">
+    <div class="stitle">Namibia PAYE — N$30,000 gross</div>
+    <div class="trow"><span style="color:var(--text2)">Gross monthly</span><span>N$30,000</span></div>
+    <div class="trow"><span style="color:var(--text2)">Annual gross</span><span>N$360,000</span></div>
+    <div class="trow"><span style="color:var(--text2)">Tax bracket</span><span>37% marginal</span></div>
+    <div class="trow"><span style="color:var(--text2)">Monthly PAYE est.</span><span style="color:var(--red)">~N$7,200</span></div>
+    <div class="trow"><span style="color:var(--text2)">Social security</span><span style="color:var(--red)">~N$270</span></div>
+    <div class="trow"><span>Net take-home (basic)</span><span style="color:var(--green)">~N$12,150</span></div>
+  </div>
+  <div class="card">
+    <div class="stitle">NAMRA tax reserve</div>
+    <div class="banner s" style="margin-bottom:.75rem">✓ N$12,000 saved in money market — earmarked for NAMRA tax. Keep this untouched.</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.7">Top it up as commission grows. When the NAMRA bill arrives, it's already covered.</div>
+  </div>
+  <div class="card">
+    <div class="stitle">Reduce your tax legally</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.8">
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border)">✓ <strong style="color:var(--text)">Retirement annuity (RA)</strong> — up to 27.5% of income is tax deductible. Old Mutual or Sanlam.</div>
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border)">✓ <strong style="color:var(--text)">Medical aid</strong> — contributions reduce taxable income.</div>
+      <div style="padding:5px 0">✓ <strong style="color:var(--text)">Tax practitioner</strong> — at N$360k/year, N$1,500 advice saves multiples.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCORE -->
+<div class="pane" id="pane-score">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:1.5rem" id="scoreWrap"></div>
+  <div id="scoreItems"></div>
+</div>
+
+<!-- HOW TO USE -->
+<div class="pane" id="pane-howto">
+  <div class="card">
+    <div class="stitle">The one rule</div>
+    <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px">Every Friday. 10 minutes. No exceptions.</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.7">Open this file every Friday evening. Enter your actuals for the week. That single habit is worth more than every feature in this tool. Rockefeller did this his entire life.</div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Your weekly habit — step by step</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.9">
+      <div style="padding:6px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);flex-shrink:0">1.</span><span>Open the <strong style="color:var(--text)">Budget tab</strong> — update the Actual column for every expense you had this week. Be honest.</span></div>
+      <div style="padding:6px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);flex-shrink:0">2.</span><span>Check the <strong style="color:var(--text)">Debt tab</strong> — see your recommended payment for the month. Pay it.</span></div>
+      <div style="padding:6px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);flex-shrink:0">3.</span><span>Log anything unplanned in the <strong style="color:var(--text)">Impulse tab</strong> before you buy it. Wait 48 hours.</span></div>
+      <div style="padding:6px 0;display:flex;gap:10px"><span style="font-weight:700;color:var(--text);flex-shrink:0">4.</span><span>Log any side project earnings in the <strong style="color:var(--text)">Commission tab</strong> under Extra Income.</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Your monthly habit — end of month</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.9">
+      <div style="padding:6px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);flex-shrink:0">1.</span><span>Complete the <strong style="color:var(--text)">Monthly Review</strong> — answer all 6 questions honestly and save it.</span></div>
+      <div style="padding:6px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);flex-shrink:0">2.</span><span>Update your debt balances in the <strong style="color:var(--text)">Debt tab</strong> — type in what you actually owe now.</span></div>
+      <div style="padding:6px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);flex-shrink:0">3.</span><span>Update saved amounts in the <strong style="color:var(--text)">Savings tab</strong> — what's actually in Simonis Storm now.</span></div>
+      <div style="padding:6px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);flex-shrink:0">4.</span><span>Hit <strong style="color:var(--text)">Record this month</strong> in the Net Worth tab — locks your net worth for history.</span></div>
+      <div style="padding:6px 0;display:flex;gap:10px"><span style="font-weight:700;color:var(--text);flex-shrink:0">5.</span><span>Use the <strong style="color:var(--text)">arrow → </strong> to move to next month. Your data is saved automatically.</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">What each tab does</div>
+    <div style="font-size:13px;line-height:1.9">
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">💰 Commission</span><span style="color:var(--text2)">Slide units and GP to see your exact take-home and how much to pay on debt.</span></div>
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">Budget</span><span style="color:var(--text2)">Your income and expenses. Update actuals every Friday.</span></div>
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">Net Worth</span><span style="color:var(--text2)">Assets minus debts. Record monthly to track your progress from -N$12,000 to zero and beyond.</span></div>
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">Debt Countdown</span><span style="color:var(--text2)">Exact calendar date your credit card hits zero. Pay extra to move it earlier.</span></div>
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">Projection</span><span style="color:var(--text2)">Where you end up in 12 months at different commission levels.</span></div>
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">Monthly Review</span><span style="color:var(--text2)">6 yes/no questions. Your discipline score. Save it every month.</span></div>
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">History</span><span style="color:var(--text2)">Every month side by side. Income, expenses, surplus, net worth trend.</span></div>
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">Patterns</span><span style="color:var(--text2)">Automatically detects which categories you overspend on consistently. Builds after 2+ months.</span></div>
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">Savings</span><span style="color:var(--text2)">Your 4 goals: Simonis Storm, NAMRA reserve, emergency fund, credit card payoff.</span></div>
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">Debt</span><span style="color:var(--text2)">Smart calculator shows exactly what to pay on credit card and NAMRA based on your surplus.</span></div>
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">Impulse</span><span style="color:var(--text2)">Your circuit breaker. Log before buying. Wait 48 hours. Most impulse buys die here.</span></div>
+      <div style="padding:5px 0;border-bottom:.5px solid var(--border);display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">Tax</span><span style="color:var(--text2)">Your PAYE breakdown and NAMRA reserve status.</span></div>
+      <div style="padding:5px 0;display:flex;gap:10px"><span style="font-weight:700;color:var(--text);width:120px;flex-shrink:0">Score</span><span style="color:var(--text2)">Your financial health out of 100. Target 75+. Improves as commission grows and debt shrinks.</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Your three numbers to memorise</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:4px">
+      <div style="background:var(--red-bg);border:.5px solid var(--red);border-radius:var(--r);padding:.75rem;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:var(--red)">6</div>
+        <div style="font-size:11px;color:var(--red);margin-top:2px">units = survival</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">Covers expenses without GF support</div>
+      </div>
+      <div style="background:var(--amber-bg);border:.5px solid var(--amber);border-radius:var(--r);padding:.75rem;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:var(--amber)">8</div>
+        <div style="font-size:11px;color:var(--amber);margin-top:2px">units = stable</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">Debt attack begins. Credit card shrinks.</div>
+      </div>
+      <div style="background:var(--green-bg);border:.5px solid var(--green);border-radius:var(--r);padding:.75rem;text-align:center">
+        <div style="font-size:22px;font-weight:700;color:var(--green)">12+</div>
+        <div style="font-size:11px;color:var(--green);margin-top:2px">units = winning</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">Debt dead fast. Wealth building starts.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Your three biggest spending leaks — confirmed from FNB statements</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.9">
+      <div style="padding:6px 0;border-bottom:.5px solid var(--border);display:flex;justify-content:space-between"><span>🔴 <strong style="color:var(--text)">Eating out</strong> — Brew & Bristle, Wimpy, KFC, Spur</span><span style="color:var(--red);font-weight:700">N$3,500/mo reality → target N$3,000</span></div>
+      <div style="padding:6px 0;border-bottom:.5px solid var(--border);display:flex;justify-content:space-between"><span>🔴 <strong style="color:var(--text)">Clothing</strong> — MRP, Edgars, Cotton On, Woolworths</span><span style="color:var(--red);font-weight:700">N$1,800/mo reality → target N$600</span></div>
+      <div style="padding:6px 0;display:flex;justify-content:space-between"><span>🟡 <strong style="color:var(--text)">Micro purchases</strong> — high transaction frequency</span><span style="color:var(--amber);font-weight:700">Use impulse tab</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="stitle">Core rules</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.9">
+      <div style="padding:4px 0;border-bottom:.5px solid var(--border)">💳 Use credit card only for fuel, groceries, subscriptions — not discretionary spending</div>
+      <div style="padding:4px 0;border-bottom:.5px solid var(--border)">📈 Every NAD of commission above N$20k expenses goes straight to credit card</div>
+      <div style="padding:4px 0;border-bottom:.5px solid var(--border)">🚫 No lifestyle inflation during high commission months</div>
+      <div style="padding:4px 0;border-bottom:.5px solid var(--border)">💰 Simonis Storm — do not touch. That's your NAMRA reserve.</div>
+      <div style="padding:4px 0">📱 Friday alarm is set — 6PM. Open this. 10 minutes. Done.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MON3=MONTHS.map(m=>m.substr(0,3));
+const BASIC=11400;
+const fmt=v=>'N$'+Math.round(v).toLocaleString();
+const fN=v=>Math.round(v).toLocaleString();
+const sumB=a=>a.reduce((s,r)=>s+Number(r.budget||0),0);
+const sumA=a=>a.reduce((s,r)=>s+Number(r.actual||0),0);
+let cm=new Date().getMonth(),cy=new Date().getFullYear();
+
+const BASIC_NET=11400;// N$15k gross ~N$11,400 net
+const DEF=()=>({
+  income:[
+    {label:'Basic salary (net after PAYE)',budget:11400,actual:11400},
+    {label:'Commission (net after tax)',budget:0,actual:0},
+    {label:'GF support',budget:4500,actual:0},
+    {label:'Side projects / freelance',budget:0,actual:0}
+  ],
+  expenses:[
+    {label:'Rent',budget:6500,actual:0},
+    {label:'Groceries',budget:4000,actual:0},
+    {label:'Eating out / coffee / fast food',budget:3000,actual:0},
+    {label:'Fuel',budget:2400,actual:0},
+    {label:'Family support (parents rent top-up)',budget:5000,actual:0},
+    {label:'AI subscriptions (ChatGPT/Claude/Canva)',budget:1100,actual:0},
+    {label:'Simonis Storm savings',budget:1500,actual:0},
+    {label:'Clothing / shopping',budget:600,actual:0},
+    {label:'Toiletries / pharmacy',budget:600,actual:0},
+    {label:'Airtime / data',budget:300,actual:0},
+    {label:'Credit card payment',budget:2000,actual:0},
+    {label:'NAMRA payment (est.)',budget:1000,actual:0}
+  ],
+  savings:[
+    {name:'Simonis Storm (money market)',target:50000,saved:12000,monthly:1500,phase:'Active',priority:1},
+    {name:'NAMRA tax reserve',target:30000,saved:12000,monthly:1000,phase:'Active',priority:1},
+    {name:'Emergency fund',target:15000,saved:0,monthly:500,phase:'Phase 1',priority:2},
+    {name:'Credit card payoff',target:24000,saved:0,monthly:2000,phase:'Phase 2',priority:2}
+  ],
+  debts:[
+    {name:'Credit card',total:24000,original:24000,payment:2000}
+  ],
+  assets:[
+    {name:'Simonis Storm money market',value:12000},
+    {name:'NAMRA tax cash reserve',value:12000}
+  ],
+  impulse:[],
+  impBud:500,
+  review:{}
+});
+
+// Persistent storage helpers
+function gk(){return`ledger_${cy}_${cm}`}
+function load(){try{const r=localStorage.getItem(gk());if(r)return JSON.parse(r)}catch(e){}return DEF()}
+function getNWH(){try{return JSON.parse(localStorage.getItem('nw_hist')||'[]')}catch(e){return[]}}
+function setNWH(h){localStorage.setItem('nw_hist',JSON.stringify(h))}
+function getRevH(){try{return JSON.parse(localStorage.getItem('rev_hist')||'[]')}catch(e){return[]}}
+function setRevH(h){localStorage.setItem('rev_hist',JSON.stringify(h))}
+function getAllMonths(){
+  // collect all monthly data for pattern detection
+  const res=[];
+  for(let y=cy-2;y<=cy;y++){
+    for(let m=0;m<12;m++){
+      try{const r=localStorage.getItem(`ledger_${y}_${m}`);if(r){const d=JSON.parse(r);res.push({y,m,data:d})}}catch(e){}
+    }
+  }
+  return res;
+}
+let S=load();
+function save(){
+  try{localStorage.setItem(gk(),JSON.stringify(S));const i=document.getElementById('sind');i.classList.add('show');setTimeout(()=>i.classList.remove('show'),1500)}catch(e){}
+}
+function chMo(d){cm+=d;if(cm>11){cm=0;cy++}if(cm<0){cm=11;cy--}S=load();renderAll();updMoLabel()}
+function updMoLabel(){document.getElementById('moLabel').textContent=MONTHS[cm]+' '+cy}
+
+// SIM
+function updSim(){
+  const u=+document.getElementById('usl').value;
+  const g=+document.getElementById('gsl').value;
+  const gf=+document.getElementById('gfsl').value;
+  document.getElementById('uv').textContent=u;
+  document.getElementById('gv').textContent=fmt(g);
+  document.getElementById('gfv').textContent=fmt(gf);
+  const gross=u*g*0.1,tax=Math.round(gross*0.3),net=gross-tax;
+  const total=BASIC+net+gf,exp=sumB(S.expenses),sur=total-exp;
+  document.getElementById('cn').textContent=fmt(net);
+  document.getElementById('gfn').textContent=fmt(gf);
+  document.getElementById('tth').textContent=fmt(total);
+  const sd=document.getElementById('surD');
+  sd.textContent=(sur>=0?'+':'')+fmt(sur);sd.style.color=sur>=0?'var(--green)':'var(--red)';
+  document.getElementById('gc').textContent=fmt(gross);
+  document.getElementById('tc').textContent=fmt(tax);
+  document.getElementById('nc').textContent=fmt(net);
+  const pct=Math.min((u/12)*100,100);
+  const f=document.getElementById('sfill');f.style.width=pct+'%';
+  f.style.background=u<6?'var(--red)':u<8?'var(--amber)':'var(--green)';
+  const msgs=['Zero units. Running on basic + GF only. You need to close cars.','1 unit. Start. Keep pushing.','2 units. Building momentum.','3 units. Halfway to survival.','4 units. Almost there.','5 units. One more and you cover expenses independently.','Survival mode. Expenses covered without GF. Debt payments possible.','Solid. Push to 8 to start real debt attack.','Stable. Debt attack mode. Every extra unit = '+fmt(g*0.07)+' net.','Strong. Debt dying faster.','Very strong. Savings possible on top of debt payments.','Excellent. Wealth building starts here.','Winning. Kill debt fast and build real wealth.'];
+  document.getElementById('simMsg').textContent=msgs[Math.min(u,12)];
+  const ccP=2000+(sur>0?Math.round(sur*0.5):0);
+  const nP=3000+(sur>0?Math.round(sur*0.3):0);
+  document.getElementById('ccp').textContent=Math.ceil(24000/Math.max(ccP,1))+' months';
+  document.getElementById('np').textContent=Math.ceil(50000/Math.max(nP,1))+' months';
+  S.income[1].budget=Math.round(net);S.income[2].budget=gf;
+  renderBudget();renderMetrics();renderRulebox();renderScore();
+}
+
+// METRICS
+function renderMetrics(){
+  const ti=sumB(S.income),te=sumB(S.expenses),sur=ti-te;
+  const td=S.debts.reduce((s,d)=>s+Number(d.total||0),0);
+  const ta=S.assets.reduce((s,a)=>s+Number(a.value||0),0);
+  const nw=ta-td;
+  document.getElementById('metrics').innerHTML=`
+    <div class="mc"><div class="mc-l">Take-home</div><div class="mc-v">${fmt(ti)}</div></div>
+    <div class="mc"><div class="mc-l">Expenses</div><div class="mc-v a">${fmt(te)}</div></div>
+    <div class="mc"><div class="mc-l">Surplus</div><div class="mc-v ${sur>=0?'g':'r'}">${fmt(sur)}</div></div>
+    <div class="mc"><div class="mc-l">Total debt</div><div class="mc-v r">${fmt(td)}</div></div>
+    <div class="mc"><div class="mc-l">Net worth</div><div class="mc-v ${nw>=0?'g':'r'}">${fmt(nw)}</div></div>`;
+  document.getElementById('warnBanner').innerHTML=te>ti?`<div class="banner d">&#9888; Expenses exceed take-home by ${fmt(te-ti)}. Close more cars or cut expenses.</div>`:'';
+}
+
+function renderRulebox(){
+  const ti=sumB(S.income);if(!ti)return;
+  const dpmt=S.debts.reduce((s,d)=>s+Number(d.payment||0),0);
+  const savE=S.expenses.filter(e=>/fund|saving|invest/i.test(e.label));
+  const svP=Math.round((sumB(savE)/ti)*100);
+  const dP=Math.round((dpmt/ti)*100);
+  const needE=S.expenses.filter(e=>!/fund|saving|invest|namra|credit/i.test(e.label));
+  const nP=Math.round((sumB(needE)/ti)*100);
+  document.getElementById('rulebox').innerHTML=`
+    <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Rockefeller rules</div>
+    <div class="rr"><span style="color:var(--text2)">Needs / living (target ≤60%)</span><span style="font-weight:700;color:${nP>60?'var(--red)':'var(--green)'}">${nP}%</span></div>
+    <div class="rr"><span style="color:var(--text2)">Debt payments (target ≤30%)</span><span style="font-weight:700;color:${dP>30?'var(--red)':'var(--green)'}">${dP}%</span></div>
+    <div class="rr"><span style="color:var(--text2)">Savings (target ≥10%)</span><span style="font-weight:700;color:${svP>=10?'var(--green)':'var(--red)'}">${svP}%</span></div>`;
+}
+
+function makeRow(item,type,idx){
+  const b=Number(item.budget||0),a=Number(item.actual||0);
+  const diff=type==='income'?a-b:b-a;
+  const pct=b>0?Math.min((a/b)*100,100):0;
+  const bc=pct<70?'ok':pct<100?'wn':'ov';
+  return `<div class="row">
+    <div class="rl">${item.label}</div>
+    <div class="bw"><div class="bf ${bc}" style="width:${Math.round(pct)}%"></div></div>
+    <input type="number" value="${b}" style="width:80px;font-size:13px" onchange="upd('${type}',${idx},'budget',this.value)"/>
+    <input type="number" value="${a}" style="width:80px;font-size:13px" onchange="upd('${type}',${idx},'actual',this.value)"/>
+    <div class="rd ${diff>=0?'p':'n'}">${diff>=0?'+':''}${fN(diff)}</div>
+    <button class="delbtn" onclick="del('${type}',${idx})">✕</button>
+  </div>`;
+}
+function renderBudget(){
+  document.getElementById('incRows').innerHTML=S.income.map((r,i)=>makeRow(r,'income',i)).join('');
+  document.getElementById('expRows').innerHTML=S.expenses.map((r,i)=>makeRow(r,'expense',i)).join('');
+}
+function upd(type,idx,f,v){
+  if(type==='income')S.income[idx][f]=+v;else S.expenses[idx][f]=+v;
+  save();renderAll();
+}
+function del(type,idx){
+  if(type==='income')S.income.splice(idx,1);else S.expenses.splice(idx,1);
+  save();renderAll();
+}
+function addInc(){
+  const l=document.getElementById('iL').value.trim();if(!l)return;
+  S.income.push({label:l,budget:+document.getElementById('iB').value||0,actual:+document.getElementById('iA').value||0});
+  ['iL','iB','iA'].forEach(id=>document.getElementById(id).value='');save();renderAll();
+}
+function addExp(){
+  const l=document.getElementById('eL').value.trim();if(!l)return;
+  S.expenses.push({label:l,budget:+document.getElementById('eB').value||0,actual:+document.getElementById('eA').value||0});
+  ['eL','eB','eA'].forEach(id=>document.getElementById(id).value='');save();renderAll();
+}
+
+// NET WORTH
+function renderNetWorth(){
+  const ta=S.assets.reduce((s,a)=>s+Number(a.value||0),0);
+  const td=S.debts.reduce((s,d)=>s+Number(d.total||0),0);
+  const nw=ta-td;
+  const col=nw>=0?'var(--green)':'var(--red)';
+  document.getElementById('nwhero').innerHTML=`
+    <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Current net worth</div>
+    <div class="nwnum" style="color:${col}">${fmt(nw)}</div>
+    <div style="font-size:13px;color:var(--text2)">${nw<0?fmt(Math.abs(nw))+' away from zero — your first milestone':'You own more than you owe ✓'}</div>`;
+  document.getElementById('assetRows').innerHTML=S.assets.length?S.assets.map((a,i)=>`
+    <div class="nwrow"><span>${a.name}</span>
+    <div style="display:flex;align-items:center;gap:6px">
+      <input type="number" value="${a.value}" style="width:90px;font-size:12px" onchange="updAsset(${i},this.value)"/>
+      <button class="delbtn" onclick="delAsset(${i})">✕</button>
+    </div></div>`).join(''):'<div class="empty">No assets yet.</div>';
+  document.getElementById('ta').textContent=fmt(ta);
+  document.getElementById('liabRows').innerHTML=S.debts.length?S.debts.map(d=>`
+    <div class="nwrow"><span>${d.name}</span><span style="color:var(--red)">${fmt(d.total)}</span></div>`).join(''):'<div class="empty">Debt free!</div>';
+  document.getElementById('tl').textContent=fmt(td);
+  const hist=getNWH();
+  const hEl=document.getElementById('nwhist');
+  if(!hist.length){hEl.innerHTML='<div class="empty">No history yet. Record this month to start.</div>';}
+  else{
+    const maxA=Math.max(...hist.map(h=>Math.abs(h.nw)),1);
+    hEl.innerHTML=hist.slice(-12).reverse().map(h=>{
+      const p=Math.min(Math.abs(h.nw)/maxA*100,100);
+      const c=h.nw>=0?'var(--green)':'var(--red)';
+      return `<div class="hrow"><span class="hmo">${h.label}</span><div class="hbw"><div class="hb" style="width:${Math.round(p)}%;background:${c}"></div></div><span class="hv" style="color:${c}">${fmt(h.nw)}</span></div>`;
+    }).join('');
+  }
+  const own=S.income.filter(i=>!/gf/i.test(i.label)).reduce((s,i)=>s+Number(i.budget||0),0);
+  const te=sumB(S.expenses);
+  const fiP=te>0?Math.min(Math.round((own/te)*100),100):0;
+  const fiC=fiP>=100?'var(--green)':fiP>=70?'var(--amber)':'var(--red)';
+  document.getElementById('fitrack').innerHTML=`
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+      <span style="color:var(--text2)">Own income covers expenses</span>
+      <span style="font-weight:700;color:${fiC}">${fiP}%</span>
+    </div>
+    <div class="prog"><div style="height:100%;border-radius:4px;background:${fiC};width:${fiP}%"></div></div>
+    <div style="font-size:12px;color:var(--text3);margin-top:6px">${fiP>=100?'Financially independent — GF support is a bonus, not a lifeline.':'Short by '+fmt(Math.max(te-own,0))+'. Target: cover 100% from your own income.'}</div>`;
+}
+function addAsset(){
+  const n=document.getElementById('aN').value.trim();if(!n)return;
+  S.assets.push({name:n,value:+document.getElementById('aV').value||0});
+  ['aN','aV'].forEach(id=>document.getElementById(id).value='');save();renderAll();
+}
+function delAsset(i){S.assets.splice(i,1);save();renderAll();}
+function updAsset(i,v){S.assets[i].value=+v;save();renderAll();}
+function recNW(){
+  const ta=S.assets.reduce((s,a)=>s+Number(a.value||0),0);
+  const td=S.debts.reduce((s,d)=>s+Number(d.total||0),0);
+  const nw=ta-td,label=MON3[cm]+' '+cy;
+  const hist=getNWH();
+  const ex=hist.findIndex(h=>h.label===label);
+  if(ex>=0)hist[ex].nw=nw;else hist.push({label,nw,ts:Date.now()});
+  setNWH(hist);renderNetWorth();
+  alert('Recorded for '+label+': '+fmt(nw));
+}
+
+// DEBT SNOWBALL
+function renderSnowball(){
+  const debts=[...S.debts].sort((a,b)=>Number(a.total)-Number(b.total));
+  const now=new Date();
+  let runningDate=new Date(now);
+  const cards=document.getElementById('sbCards');
+  if(!debts.length){cards.innerHTML='<div class="empty">No debts. You are free.</div>';document.getElementById('dfDate').innerHTML='';return;}
+  let html='';
+  debts.forEach(d=>{
+    const pmt=Number(d.payment)||1;
+    const months=Math.ceil(Number(d.total)/pmt);
+    runningDate=new Date(runningDate);
+    runningDate.setMonth(runningDate.getMonth()+months);
+    const pct=d.original>0?Math.round((Number(d.total)/Number(d.original))*100):100;
+    const gone=100-pct;
+    html+=`<div class="sb-item">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div><div class="sb-label" style="font-size:12px;color:var(--text3);margin-bottom:2px">PAYOFF DATE</div>
+        <div class="sb-date">${runningDate.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</div>
+        <div class="sb-label">${d.name} · ${fmt(d.total)} remaining · ${fmt(pmt)}/month</div></div>
+        <div style="font-size:24px;font-weight:700;color:var(--text3)">${months}mo</div>
+      </div>
+      <div class="sb-prog"><div class="sb-fill" style="width:${pct}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2)">
+        <span style="color:var(--green)">${gone}% paid off</span><span>${pct}% remaining</span>
+      </div>
+    </div>`;
+  });
+  cards.innerHTML=html;
+  const totalMonths=debts.reduce((s,d)=>s+Math.ceil(Number(d.total)/Math.max(Number(d.payment),1)),0);
+  const freeDate=new Date(now);freeDate.setMonth(freeDate.getMonth()+totalMonths);
+  document.getElementById('dfDate').innerHTML=`
+    <div style="text-align:center;padding:1rem">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:4px">ESTIMATED DEBT-FREE DATE</div>
+      <div style="font-size:28px;font-weight:700;color:var(--green)">${freeDate.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px">Pay extra every month to move this date earlier.</div>
+    </div>`;
+}
+
+// PROJECTION
+function updProj(){
+  const u=+document.getElementById('pUnits').value;
+  const g=+document.getElementById('pGP').value;
+  const gf=+document.getElementById('pGF').value;
+  document.getElementById('pUv').textContent=u;
+  document.getElementById('pGv').textContent=fmt(g);
+  document.getElementById('pGFv').textContent=fmt(gf);
+  const netComm=Math.round(u*g*0.1*0.7);
+  const monthlyIncome=BASIC+netComm+gf;
+  const monthlyExp=sumB(S.expenses);
+  const monthlySurplus=monthlyIncome-monthlyExp;
+  let ccBal=S.debts.find(d=>/credit/i.test(d.name))?.total||24000;
+  let nBal=S.debts.find(d=>/namra/i.test(d.name))?.total||50000;
+  let ta=S.assets.reduce((s,a)=>s+Number(a.value||0),0);
+  const rows=[];
+  const now=new Date();
+  for(let i=1;i<=12;i++){
+    const extra=Math.max(monthlySurplus,0);
+    const ccPmt=Math.min(ccBal,2000+(ccBal>0?Math.round(extra*0.6):0));
+    ccBal=Math.max(0,ccBal-ccPmt);
+    const nPmt=Math.min(nBal,3000+(nBal>0&&ccBal===0?Math.round(extra*0.4):0));
+    nBal=Math.max(0,nBal-nPmt);
+    ta+=Math.max(monthlySurplus-ccPmt-nPmt+2000+3000,0)*0.3;
+    const d=new Date(now);d.setMonth(d.getMonth()+i);
+    rows.push({mo:MON3[d.getMonth()]+' '+d.getFullYear(),nw:Math.round(ta-(ccBal+nBal)),cc:Math.round(ccBal),n:Math.round(nBal),inc:monthlyIncome,sur:monthlySurplus});
+  }
+  const finalNW=rows[11].nw;
+  const startNW=S.assets.reduce((s,a)=>s+Number(a.value||0),0)-S.debts.reduce((s,d)=>s+Number(d.total||0),0);
+  const nwChange=finalNW-startNW;
+  document.getElementById('projSummary').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1rem">
+      <div class="ib"><div class="ibl">Monthly income</div><div class="ibv">${fmt(monthlyIncome)}</div></div>
+      <div class="ib"><div class="ibl">Monthly surplus</div><div class="ibv" style="color:${monthlySurplus>=0?'var(--green)':'var(--red)'}">${fmt(monthlySurplus)}</div></div>
+      <div class="ib"><div class="ibl">Net worth in 12mo</div><div class="ibv" style="color:${finalNW>=0?'var(--green)':'var(--red)'}">${fmt(finalNW)}</div></div>
+    </div>
+    <div class="banner ${nwChange>=0?'s':'d'}">${nwChange>=0?'✓ Net worth improves by '+fmt(nwChange)+' over 12 months.':'⚠ Net worth declines by '+fmt(Math.abs(nwChange))+'. Increase units or cut expenses.'}</div>`;
+  const minNW=Math.min(...rows.map(r=>r.nw));
+  const maxNW=Math.max(...rows.map(r=>r.nw),1);
+  const range=maxNW-minNW||1;
+  document.getElementById('projChart').innerHTML=rows.map(r=>{
+    const pct=Math.round(((r.nw-minNW)/range)*100);
+    const col=r.nw>=0?'var(--green)':r.nw>startNW?'var(--amber)':'var(--red)';
+    return `<div class="proj-row">
+      <span class="proj-mo">${r.mo}</span>
+      <div class="proj-bw"><div class="proj-fill" style="width:${pct}%;background:${col}"></div></div>
+      <span class="proj-val" style="color:${col}">${fmt(r.nw)}</span>
+    </div>`;
+  }).join('');
+}
+
+// MONTHLY REVIEW
+const REV_QS=[
+  {id:'units',q:'Did you hit your monthly unit sales target?'},
+  {id:'budget',q:'Did you stay within your expense budget?'},
+  {id:'savings',q:'Did you add to your emergency fund or savings?'},
+  {id:'debt',q:'Did you make all debt payments on time?'},
+  {id:'impulse',q:'Did you avoid major impulse purchases?'},
+  {id:'actuals',q:'Did you update your actuals at least weekly?'}
+];
+function renderReview(){
+  const rev=S.review||{};
+  document.getElementById('revGrid').innerHTML=REV_QS.map(q=>`
+    <div class="rev-item">
+      <div class="rev-q">${q.q}</div>
+      <div class="rev-btns">
+        <button class="rev-btn yes ${rev[q.id]==='yes'?'sel':''}" onclick="setRev('${q.id}','yes')">✓ Yes</button>
+        <button class="rev-btn no ${rev[q.id]==='no'?'sel':''}" onclick="setRev('${q.id}','no')">✗ No</button>
+      </div>
+    </div>`).join('');
+  const answered=REV_QS.filter(q=>rev[q.id]);
+  const yeses=REV_QS.filter(q=>rev[q.id]==='yes').length;
+  const total=REV_QS.length;
+  const pct=Math.round((yeses/total)*100);
+  const col=pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
+  document.getElementById('revScore').innerHTML=`
+    <div style="font-size:12px;color:var(--text3);margin-bottom:6px">MONTHLY DISCIPLINE SCORE</div>
+    <div style="font-size:36px;font-weight:700;color:${col}">${yeses}/${total}</div>
+    <div class="prog" style="margin:.75rem auto;max-width:200px"><div style="height:100%;border-radius:4px;background:${col};width:${pct}%"></div></div>
+    <div style="font-size:13px;color:var(--text2)">${pct>=80?'Strong discipline. Keep this up.':pct>=50?'Getting there. Identify weak spots and fix them.':'Struggling with discipline. Focus on one habit at a time.'}</div>`;
+  const hist=getRevH();
+  document.getElementById('revHist').innerHTML=hist.length?hist.slice(-6).reverse().map(h=>{
+    const p=Math.round((h.yes/h.total)*100);
+    const c=p>=80?'var(--green)':p>=50?'var(--amber)':'var(--red)';
+    return `<div class="hrow"><span class="hmo">${h.label}</span><div class="hbw"><div class="hb" style="width:${p}%;background:${c}"></div></div><span class="hv" style="color:${c}">${h.yes}/${h.total}</span></div>`;
+  }).join(''):'<div class="empty">No history yet. Save your first review.</div>';
+}
+function setRev(id,val){S.review=S.review||{};S.review[id]=val;save();renderReview();}
+function saveReview(){
+  const rev=S.review||{};
+  const yeses=REV_QS.filter(q=>rev[q.id]==='yes').length;
+  const label=MON3[cm]+' '+cy;
+  const hist=getRevH();
+  const ex=hist.findIndex(h=>h.label===label);
+  const entry={label,yes:yeses,total:REV_QS.length,ts:Date.now()};
+  if(ex>=0)hist[ex]=entry;else hist.push(entry);
+  setRevH(hist);renderReview();
+  alert('Review saved for '+label+': '+yeses+'/'+REV_QS.length);
+}
+
+// SPENDING PATTERNS
+function renderPatterns(){
+  const allMonths=getAllMonths().filter(m=>!(m.y===cy&&m.m===cm));
+  const el=document.getElementById('patternCards');
+  if(allMonths.length<2){el.innerHTML='<div class="empty">Need at least 2 months of actuals to detect patterns. Update your actuals each month.</div>';return;}
+  // Check each expense category across months
+  const cats={};
+  allMonths.forEach(({y,m,data})=>{
+    (data.expenses||[]).forEach(e=>{
+      const b=Number(e.budget||0),a=Number(e.actual||0);
+      if(!b||!a)return;
+      if(!cats[e.label])cats[e.label]={over:0,total:0,amounts:[]};
+      cats[e.label].total++;
+      if(a>b){cats[e.label].over++;cats[e.label].amounts.push({diff:a-b,pct:Math.round(((a-b)/b)*100)});}
+    });
+  });
+  const patterns=Object.entries(cats)
+    .filter(([,v])=>v.total>=2&&v.over>=2)
+    .sort((a,b)=>b[1].over-a[1].over);
+  if(!patterns.length){el.innerHTML='<div class="empty">No consistent overspending patterns detected yet. Good.</div>';return;}
+  el.innerHTML=`<div class="banner d" style="margin-bottom:1rem">⚠ Found ${patterns.length} consistent overspending pattern${patterns.length>1?'s':''}. These are your money leaks.</div>`+
+  patterns.map(([label,v])=>{
+    const pct=Math.round((v.over/v.total)*100);
+    const avgOver=v.amounts.length?Math.round(v.amounts.reduce((s,a)=>s+a.diff,0)/v.amounts.length):0;
+    const col=pct>=80?'var(--red)':pct>=60?'var(--amber)':'var(--amber)';
+    return `<div class="pat-item">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">${label}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">Over budget ${v.over} of ${v.total} months · avg overspend ${fmt(avgOver)}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:16px;font-weight:700;color:${col}">${pct}%</div>
+        <div style="font-size:10px;color:var(--text3)">of months</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// SAVINGS
+function renderSavings(){
+  const c=document.getElementById('savCards');
+  if(!S.savings.length){c.innerHTML='<div class="empty">No savings goals.</div>';return;}
+  c.innerHTML=[...S.savings].sort((a,b)=>a.priority-b.priority).map(g=>{
+    const idx=S.savings.indexOf(g);
+    const pct=g.target>0?Math.min(Math.round((g.saved/g.target)*100),100):0;
+    const mo=g.monthly>0&&g.saved<g.target?Math.ceil((g.target-g.saved)/g.monthly):'—';
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div><div style="font-size:14px;font-weight:700">${g.name}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">${fmt(g.saved)} of ${fmt(g.target)} · ${fmt(g.monthly)}/mo · ~${mo} months</div></div>
+        <div style="display:flex;align-items:center;gap:6px"><span class="badge">${g.phase}</span><button class="delbtn" onclick="delSav(${idx})">✕</button></div>
+      </div>
+      <div class="prog"><div class="pg" style="width:${pct}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2)">
+        <span>${pct}% complete</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span>Saved:</span><input type="number" value="${g.saved}" style="width:80px;font-size:12px" onchange="updSav(${idx},'saved',this.value)"/>
+          <span>/mo:</span><input type="number" value="${g.monthly}" style="width:70px;font-size:12px" onchange="updSav(${idx},'monthly',this.value)"/>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addSav(){
+  const n=document.getElementById('sN').value.trim();const t=+document.getElementById('sT').value;if(!n||!t)return;
+  S.savings.push({name:n,target:t,saved:+document.getElementById('sS').value||0,monthly:+document.getElementById('sMo').value||0,phase:'Custom',priority:4});
+  ['sN','sT','sS','sMo'].forEach(id=>document.getElementById(id).value='');save();renderAll();
+}
+function delSav(i){S.savings.splice(i,1);save();renderAll();}
+function updSav(i,f,v){S.savings[i][f]=+v;save();renderAll();}
+
+// DEBT
+function renderDebt(){
+  const c=document.getElementById('debtCards');
+  // Smart payment calculator
+  const ti=sumB(S.income);
+  const te=sumB(S.expenses);
+  const surplus=ti-te;
+  const cc=S.debts.find(d=>/credit/i.test(d.name));
+  const namra=S.debts.find(d=>/namra/i.test(d.name));
+  const calcEl=document.getElementById('debtPayCalc');
+  if(calcEl){
+    if(surplus<=0){
+      calcEl.innerHTML=`<div class="card" style="border-color:var(--red)">
+        <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">⚠ No surplus — minimum payments only</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6">Your income does not cover expenses right now. Focus on closing cars first. Pay minimums only until commission kicks in.</div>
+        ${cc?`<div style="margin-top:10px;padding-top:10px;border-top:.5px solid var(--border);display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text2)">Credit card minimum</span><span style="font-weight:700;color:var(--red)">${fmt(cc.payment)}/month</span></div>`:''}
+        ${namra?`<div style="margin-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text2)">NAMRA minimum</span><span style="font-weight:700;color:var(--red)">${fmt(namra.payment)}/month</span></div>`:''}
+      </div>`;
+    } else {
+      // Snowball strategy: throw surplus at CC first, then NAMRA
+      const ccMin=cc?Number(cc.payment)||0:0;
+      const namraMin=namra?Number(namra.payment)||0:0;
+      const extraAfterMin=Math.max(surplus-0,0);// surplus already excludes minimums if in expenses
+      // If CC still has balance, throw everything extra at it
+      const ccBal=cc?Number(cc.total):0;
+      const namraBal=namra?Number(namra.total):0;
+      let ccRecommended=ccMin,namraRecommended=namraMin;
+      if(ccBal>0){
+        ccRecommended=ccMin+Math.round(surplus*0.8);
+        namraRecommended=namraMin;
+      } else if(namraBal>0){
+        namraRecommended=namraMin+Math.round(surplus*0.8);
+      }
+      const ccMonths=ccBal>0&&ccRecommended>0?Math.ceil(ccBal/ccRecommended):'—';
+      const namraMonths=namraBal>0&&namraRecommended>0?Math.ceil(namraBal/namraRecommended):'—';
+      calcEl.innerHTML=`<div class="card" style="border-color:var(--green)">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px">✓ Recommended payments this month</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Based on your current surplus of <strong style="color:var(--green)">${fmt(surplus)}</strong> — snowball method, CC first.</div>
+        ${cc?`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid var(--border)">
+          <div><div style="font-size:13px;font-weight:600">${cc.name}</div><div style="font-size:11px;color:var(--text2)">Balance: ${fmt(ccBal)} · ~${ccMonths} months at this rate</div></div>
+          <div style="text-align:right"><div style="font-size:18px;font-weight:700;color:var(--green)">${fmt(ccRecommended)}</div><div style="font-size:10px;color:var(--text3)">PAY THIS MONTH</div></div>
+        </div>`:''}
+        ${namra?`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
+          <div><div style="font-size:13px;font-weight:600">${namra.name}</div><div style="font-size:11px;color:var(--text2)">Balance: ${fmt(namraBal)} · ~${namraMonths} months at this rate</div></div>
+          <div style="text-align:right"><div style="font-size:18px;font-weight:700;color:${ccBal>0?'var(--amber)':'var(--green)'}">${fmt(namraRecommended)}</div><div style="font-size:10px;color:var(--text3)">${ccBal>0?'MINIMUM ONLY':'PAY THIS MONTH'}</div></div>
+        </div>`:''}
+        <div style="margin-top:10px;padding-top:10px;border-top:.5px solid var(--border);font-size:12px;color:var(--text2)">Rule: once CC is dead, redirect everything to NAMRA. Every N$1,000 extra = ${Math.ceil(1000/(ccBal||1))*100}% faster payoff.</div>
+      </div>`;
+    }
+  }
+  if(!S.debts.length){c.innerHTML='<div class="empty">Debt free. You made it.</div>';return;}
+  const total=S.debts.reduce((s,d)=>s+Number(d.total||0),0);
+  c.innerHTML=`<div class="banner d" style="margin-bottom:1rem">Total debt: <strong>${fmt(total)}</strong> — snowball: kill smallest first.</div>`+
+  S.debts.map((d,i)=>{
+    const pct=d.original>0?Math.round((d.total/d.original)*100):0;
+    const mo=d.payment>0?Math.ceil(d.total/d.payment):'?';
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div><div style="font-size:14px;font-weight:700">${d.name}</div>
+        <div style="font-size:12px;color:var(--text2)">${fmt(d.payment)}/month · ~${mo} months at current rate</div></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="font-size:15px;font-weight:700;color:var(--red)">${fmt(d.total)}</div><button class="delbtn" onclick="delDebt(${i})">✕</button></div>
+      </div>
+      <div class="prog"><div class="pr" style="width:${pct}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2)">
+        <span>${pct}% remaining</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span>Bal:</span><input type="number" value="${d.total}" style="width:85px;font-size:12px" onchange="updDebt(${i},'total',this.value)"/>
+          <span>Pmt:</span><input type="number" value="${d.payment}" style="width:75px;font-size:12px" onchange="updDebt(${i},'payment',this.value)"/>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addDebt(){
+  const n=document.getElementById('dN').value.trim();const t=+document.getElementById('dT').value;if(!n||!t)return;
+  S.debts.push({name:n,total:t,original:t,payment:+document.getElementById('dP').value||0});
+  ['dN','dT','dP'].forEach(id=>document.getElementById(id).value='');save();renderAll();
+}
+function delDebt(i){S.debts.splice(i,1);save();renderAll();}
+function updDebt(i,f,v){S.debts[i][f]=+v;save();renderAll();}
+
+// IMPULSE
+function renderImpulse(){
+  const bud=S.impBud;
+  const spent=S.impulse.filter(x=>x.bought).reduce((s,x)=>s+Number(x.amt),0);
+  const pct=bud>0?Math.min(Math.round((spent/bud)*100),100):0;
+  const bc=pct<70?'ok':pct<100?'wn':'ov';
+  document.getElementById('impBbar').innerHTML=bud?`
+    <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Spent: ${fmt(spent)} of ${fmt(bud)} (${pct}%)</div>
+    <div class="bw" style="height:8px;max-width:100%"><div class="bf ${bc}" style="width:${pct}%"></div></div>`:'';
+  const list=document.getElementById('impList');
+  if(!S.impulse.length){list.innerHTML='<div class="empty">Nothing logged. Good discipline.</div>';return;}
+  list.innerHTML=S.impulse.map((x,i)=>`
+    <div class="impitem">
+      <div><span>${x.desc}</span><span style="font-size:11px;color:var(--text3);margin-left:6px">${x.date}</span>${x.bought?'<span style="font-size:11px;color:var(--green);margin-left:6px">bought</span>':'<span style="font-size:11px;color:var(--text2);margin-left:6px">⏳ 48hr wait</span>'}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="color:var(--red);font-weight:700">${fmt(x.amt)}</span>
+        ${!x.bought?`<button class="btn" style="font-size:11px;padding:2px 8px" onclick="buyImp(${i})">Bought</button>`:''}
+        <button class="delbtn" onclick="delImp(${i})">✕</button>
+      </div>
+    </div>`).join('');
+}
+function addImp(){
+  const d=document.getElementById('impD').value.trim();if(!d)return;
+  const today=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  S.impulse.unshift({desc:d,amt:+document.getElementById('impA').value||0,date:today,bought:false});
+  document.getElementById('impD').value='';document.getElementById('impA').value='';save();renderAll();
+}
+function buyImp(i){S.impulse[i].bought=true;save();renderAll();}
+function delImp(i){S.impulse.splice(i,1);save();renderAll();}
+function setImpB(){S.impBud=+document.getElementById('impB').value||500;save();renderAll();}
+
+// SCORE
+function renderScore(){
+  const ti=sumB(S.income);if(!ti){document.getElementById('scoreWrap').innerHTML='<div class="empty">Add income to calculate.</div>';return;}
+  const dpmt=S.debts.reduce((s,d)=>s+Number(d.payment||0),0);
+  const savAmt=S.savings.reduce((s,g)=>s+Number(g.monthly||0),0);
+  const svP=savAmt/ti,te=sumB(S.expenses);
+  const impSpent=S.impulse.filter(x=>x.bought).reduce((s,x)=>s+Number(x.amt),0);
+  const gf=S.income.find(i=>/gf/i.test(i.label));
+  const gfP=gf?Number(gf.budget)/ti:0;
+  let score=100;const checks=[];
+  const dr=dpmt/ti;
+  if(dr>0.4){score-=25;checks.push({t:'Debt payments exceed 40% of take-home',b:true});}
+  else if(dr>0.3){score-=12;checks.push({t:'Debt payments 30–40% of take-home',b:true});}
+  else checks.push({t:'Debt-to-income ratio manageable',b:false});
+  if(svP<0.05){score-=20;checks.push({t:'Savings below 5% — critical gap',b:true});}
+  else if(svP<0.1){score-=10;checks.push({t:'Savings below 10% target',b:true});}
+  else checks.push({t:'Savings rate on target',b:false});
+  if(te>ti){score-=30;checks.push({t:'Expenses exceed take-home income',b:true});}
+  else if(te>ti*0.95){score-=15;checks.push({t:'Expenses very close to income limit',b:true});}
+  else checks.push({t:'Expenses within take-home income',b:false});
+  if(impSpent>ti*0.1){score-=10;checks.push({t:'Impulse spending over 10% of income',b:true});}
+  else checks.push({t:'Impulse spending controlled',b:false});
+  if(gfP>0.15){score-=10;checks.push({t:`GF support = ${Math.round(gfP*100)}% of income — vulnerability`,b:true});}
+  else if(gfP>0)checks.push({t:'GF support logged — work toward independence',b:false});
+  score=Math.max(0,Math.min(100,score));
+  const col=score>=75?'var(--green)':score>=50?'var(--amber)':'var(--red)';
+  const lbl=score>=75?'Healthy':score>=50?'At risk':'Critical';
+  document.getElementById('scoreWrap').innerHTML=`
+    <div class="scirc" style="border-color:${col};color:${col}">
+      <div style="font-size:26px;font-weight:700">${score}</div>
+      <div style="font-size:10px;color:var(--text3)">/100</div>
+    </div>
+    <div><div style="font-size:18px;font-weight:700;margin-bottom:4px">${lbl}</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.5">Update actuals every Friday. Score improves as you close more deals and pay down debt.</div></div>`;
+  document.getElementById('scoreItems').innerHTML=checks.map(c=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;border-bottom:.5px solid var(--border)">
+      <span style="color:${c.b?'var(--red)':'var(--green)'};font-size:16px;flex-shrink:0">${c.b?'✗':'✓'}</span>
+      <span>${c.t}</span>
+    </div>`).join('');
+}
+
+// MONTHLY HISTORY
+function renderHistory(){
+  // Collect all saved months from localStorage
+  const allData=[];
+  for(let y=cy-2;y<=cy;y++){
+    for(let m=0;m<12;m++){
+      try{
+        const key=`ledger_${y}_${m}`;
+        const raw=localStorage.getItem(key);
+        if(raw){
+          const d=JSON.parse(raw);
+          const ti=sumB(d.income||[]);
+          const te=sumB(d.expenses||[]);
+          const ta=(d.assets||[]).reduce((s,a)=>s+Number(a.value||0),0);
+          const td=(d.debts||[]).reduce((s,dbt)=>s+Number(dbt.total||0),0);
+          const tiA=(d.income||[]).reduce((s,r)=>s+Number(r.actual||0),0);
+          const teA=(d.expenses||[]).reduce((s,r)=>s+Number(r.actual||0),0);
+          allData.push({y,m,label:MON3[m]+' '+y,ti,te,tiA,teA,sur:ti-te,surA:tiA-teA,nw:ta-td,isCurrent:y===cy&&m===cm});
+        }
+      }catch(e){}
+    }
+  }
+  if(!allData.length){
+    document.getElementById('histTable').innerHTML='<div class="empty">No history yet. Navigate through months and update actuals to build your history.</div>';
+    document.getElementById('histChart').innerHTML='';
+    document.getElementById('histSurplus').innerHTML='';
+    return;
+  }
+
+  // Summary table
+  const headers=['Month','Income (B)','Expenses (B)','Surplus (B)','Actual In','Actual Out','Actual Sur','Net Worth'];
+  document.getElementById('histTable').innerHTML=`
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="border-bottom:.5px solid var(--border2)">${headers.map(h=>`<th style="text-align:right;padding:5px 6px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap">${h}</th>`).join('')}</tr>
+        </thead>
+        <tbody>${allData.map(r=>`
+          <tr style="border-bottom:.5px solid var(--border);${r.isCurrent?'background:var(--surface2)':''}">
+            <td style="padding:6px 6px;font-weight:${r.isCurrent?'700':'400'};color:var(--text);white-space:nowrap">${r.label}${r.isCurrent?' ←':''}</td>
+            <td style="text-align:right;padding:6px 6px;color:var(--text2)">${fmt(r.ti)}</td>
+            <td style="text-align:right;padding:6px 6px;color:var(--text2)">${fmt(r.te)}</td>
+            <td style="text-align:right;padding:6px 6px;font-weight:600;color:${r.sur>=0?'var(--green)':'var(--red)'}">${r.sur>=0?'+':''}${fmt(r.sur)}</td>
+            <td style="text-align:right;padding:6px 6px;color:${r.tiA>0?'var(--text)':'var(--text3)'}">${r.tiA>0?fmt(r.tiA):'—'}</td>
+            <td style="text-align:right;padding:6px 6px;color:${r.teA>0?'var(--text)':'var(--text3)'}">${r.teA>0?fmt(r.teA):'—'}</td>
+            <td style="text-align:right;padding:6px 6px;font-weight:600;color:${r.surA>=0?'var(--green)':'var(--red)'}">${r.tiA>0||r.teA>0?(r.surA>=0?'+':'')+fmt(r.surA):'—'}</td>
+            <td style="text-align:right;padding:6px 6px;font-weight:600;color:${r.nw>=0?'var(--green)':'var(--red)'}">${fmt(r.nw)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+  // Income vs expenses bar chart
+  const maxVal=Math.max(...allData.map(r=>Math.max(r.ti,r.te)),1);
+  document.getElementById('histChart').innerHTML=allData.map(r=>{
+    const incPct=Math.round((r.ti/maxVal)*100);
+    const expPct=Math.round((r.te/maxVal)*100);
+    return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--border);font-size:12px">
+      <span style="width:65px;flex-shrink:0;color:var(--text2)">${r.label}</span>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">
+          <div style="height:5px;border-radius:3px;background:var(--green);width:${incPct}%;transition:width .4s"></div>
+          <span style="color:var(--green);font-size:11px">${fmt(r.ti)}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+          <div style="height:5px;border-radius:3px;background:var(--red);width:${expPct}%;transition:width .4s"></div>
+          <span style="color:var(--red);font-size:11px">${fmt(r.te)}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Surplus chart
+  const maxSur=Math.max(...allData.map(r=>Math.abs(r.sur)),1);
+  document.getElementById('histSurplus').innerHTML=allData.map(r=>{
+    const pct=Math.round((Math.abs(r.sur)/maxSur)*100);
+    const col=r.sur>=0?'var(--green)':'var(--red)';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--border);font-size:12px">
+      <span style="width:65px;flex-shrink:0;color:var(--text2)">${r.label}</span>
+      <div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden">
+        <div style="height:100%;border-radius:4px;background:${col};width:${pct}%"></div>
+      </div>
+      <span style="width:80px;text-align:right;font-weight:700;color:${col};flex-shrink:0">${r.sur>=0?'+':''}${fmt(r.sur)}</span>
+    </div>`;
+  }).join('');
+}
+
+// EXTRA INCOME
+function renderExtraIncome(){
+  const el=document.getElementById('extraIncomeList');
+  if(!el)return;
+  const extras=S.income.filter(i=>i.extra);
+  if(!extras.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:4px 0">No extra income logged this month.</div>';return;}
+  const total=extras.reduce((s,i)=>s+Number(i.actual||0),0);
+  el.innerHTML=extras.map((item,i)=>{
+    const idx=S.income.indexOf(item);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid var(--border);font-size:13px">
+      <span style="color:var(--text)">${item.label}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-weight:700;color:var(--green)">${fmt(item.actual)}</span>
+        <button class="delbtn" onclick="delExtraIncome(${idx})">✕</button>
+      </div>
+    </div>`;
+  }).join('')+`<div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;padding:6px 0;margin-top:4px;border-top:.5px solid var(--border2)"><span>Total extra</span><span style="color:var(--green)">${fmt(total)}</span></div>`;
+}
+function addExtraIncome(){
+  const label=document.getElementById('extraLabel').value.trim();
+  const amt=+document.getElementById('extraAmt').value;
+  if(!label||!amt)return;
+  S.income.push({label,budget:0,actual:amt,extra:true});
+  document.getElementById('extraLabel').value='';
+  document.getElementById('extraAmt').value='';
+  save();renderAll();
+}
+function delExtraIncome(idx){
+  S.income.splice(idx,1);
+  save();renderAll();
+}
+
+function renderAll(){
+  renderMetrics();renderRulebox();renderBudget();renderNetWorth();
+  renderSnowball();renderSavings();renderDebt();renderImpulse();
+  renderScore();renderReview();renderPatterns();updProj();renderHistory();renderExtraIncome();
+}
+function sw(n){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`[onclick="sw('${n}')"]`).classList.add('active');
+  document.getElementById('pane-'+n).classList.add('active');
+  if(n==='history')renderHistory();
+}
+updMoLabel();updSim();updProj();
+</script>
+</body>
+</html>
